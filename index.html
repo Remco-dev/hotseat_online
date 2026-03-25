@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hot Seat Planner</title>
+<style>
+:root{--bg:#20080c;--bg2:#3a0d16;--panel:#5f1020;--panel2:#7f1d2d;--card:#fff;--line:#ecd5d9;--muted:#7a5f67;--text:#2a1116;--textLight:#fff1f2;--accent:#be123c;--accent2:#9f1239;--accent3:#881337;--good:#166534;--warn:#9a3412;--danger:#991b1b;--soft:#fff8f8;--soft2:#fdf2f8;--holiday:#efe6e7;--today:#ffe4e6;--ooo:#fff1cc;--shadow:0 12px 34px rgba(42,17,22,.15);--radius:18px}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:linear-gradient(135deg,var(--bg),var(--bg2) 35%,#2a0a12);color:var(--text)}button,input,select,textarea{font:inherit}button{cursor:pointer}
+.app{display:grid;grid-template-columns:360px minmax(0,1fr);min-height:100vh}.sidebar{background:rgba(70,12,24,.78);color:var(--textLight);padding:22px;border-right:1px solid rgba(255,255,255,.08);backdrop-filter:blur(18px);overflow:hidden}.main{padding:20px;min-width:0}.surface{background:rgba(255,255,255,.97);border-radius:24px;box-shadow:var(--shadow);padding:20px}
+.brand h1{margin:0 0 8px;font-size:1.45rem}.brand p{margin:0;color:#fecdd3;font-size:.94rem;line-height:1.45}.side-card,.panelLight{border-radius:18px;padding:16px}.side-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);margin-top:14px}.side-card h3,.panelLight h3{margin:0 0 12px;font-size:1rem}.panelLight{background:#fff;border:1px solid var(--line)}
+.toolbar{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap;margin-bottom:16px}.toolbar h2{margin:0 0 4px;font-size:1.5rem}.muted{color:var(--muted)}
+.btnRow{display:flex;gap:8px;flex-wrap:wrap}.btn{border:none;border-radius:12px;padding:10px 14px;background:var(--accent);color:#fff;font-weight:800}.btn:hover{background:var(--accent2)}.btn.secondary{background:#fff;color:var(--text);border:1px solid var(--line)}.btn.good{background:#ecfdf5;color:#166534;border:1px solid #bbf7d0}.btn.danger{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}.btn.small{padding:7px 10px;border-radius:10px;font-size:.92rem}.btn.ghost{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.12)}.btn.confirming{background:#7f1d2d;color:#fff;border-color:#7f1d2d}
+input,select,textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:#fff;color:var(--text)}textarea{min-height:48px;resize:vertical}.helper{font-size:.84rem;color:var(--muted);line-height:1.45}.tiny{font-size:.76rem;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(140px,1fr));gap:12px;margin:0 0 16px}.stat{background:#fff;border:1px solid var(--line);border-radius:16px;padding:13px}.stat b{display:block;font-size:1.35rem;margin-top:6px}
+.quickMonths{display:grid;gap:8px}.monthBtn{border:1px solid rgba(255,255,255,.12);background:transparent;color:var(--textLight);padding:10px 12px;border-radius:12px;text-align:left;font-weight:800}.monthBtn.active{background:var(--accent2);border-color:var(--accent2)}.monthSelect{background:rgba(255,255,255,.95);color:var(--text)}
+.calendar-grid{display:grid;grid-template-columns:repeat(5,minmax(205px,1fr));gap:10px}.day{background:#fff;border:1px solid var(--line);border-radius:14px;padding:9px;display:flex;flex-direction:column;gap:8px;min-height:175px}.day.holiday{background:var(--holiday)}.day.today{outline:3px solid var(--today)}.day.oooDay{box-shadow:inset 0 0 0 2px #f59e0b}.dayHead{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.dayHead h4{margin:0;font-size:.96rem}.pill{padding:4px 8px;border-radius:999px;font-size:.71rem;font-weight:800;background:var(--soft2);color:var(--accent3)}
+.periodGrid{display:grid;gap:7px}.periodRow{display:grid;grid-template-columns:18px 1fr 1fr;gap:7px;align-items:start}.periodLabel{font-size:.58rem;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding-top:12px;text-align:center;writing-mode:vertical-rl;transform:rotate(180deg)}.slot{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:6px}.slotTop{display:flex;justify-content:space-between;align-items:center;gap:4px;margin-bottom:4px}.slot label{font-size:.7rem;font-weight:900;color:var(--muted)}.slot select{padding:7px 8px;font-size:1rem;width:100%;min-width:0}.lockLabel{display:flex;align-items:center;gap:2px;font-size:.64rem;color:var(--muted);white-space:nowrap}.lockLabel input{width:auto}.lockText{display:none}
+.memberGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}.memberCard{background:linear-gradient(180deg,#fff,#fff7f8);border:1px solid var(--line);border-radius:16px;padding:12px;display:grid;gap:10px;box-shadow:0 6px 18px rgba(159,18,57,.05)}.memberCardHead{display:flex;justify-content:space-between;align-items:center;gap:10px}.memberName{font-weight:900;font-size:1rem}.memberRolePill{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;background:#ffe4e6;color:#9f1239;font-size:.74rem;font-weight:800}.field{display:grid;gap:6px}.field label{font-size:.74rem;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:.04em}.switchRow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 10px;background:#fff;border:1px solid var(--line);border-radius:10px}.switchRow span{font-size:.85rem;font-weight:700}.divider{height:1px;background:var(--line);margin:14px 0}.tableWrap{overflow:auto}table{width:100%;border-collapse:collapse}th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.dangerText{color:#991b1b;font-weight:700}.oooList{display:grid;gap:10px}.oooItem{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"name delete" "from from" "to to";gap:8px;align-items:center;padding:12px;border:1px solid rgba(255,255,255,.16);border-radius:16px;background:rgba(255,255,255,.06)}.oooName{grid-area:name;font-weight:800;color:#fff;min-width:0}.oooDelete{grid-area:delete;justify-self:end}.oooMeta{display:flex;align-items:center;gap:8px;min-width:0;color:#ffe4e6;font-variant-numeric:tabular-nums;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:8px 10px}.oooFrom{grid-area:from}.oooTo{grid-area:to}.oooMetaLabel{font-size:.72rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:#fda4af;min-width:38px}.oooMetaValue{min-width:0;overflow-wrap:anywhere}.oooEmpty{padding:10px 12px;border:1px dashed rgba(255,255,255,.22);border-radius:14px;color:#fecdd3}.oooHead{display:none}
+@media (max-width:1250px){.app{grid-template-columns:1fr}.sidebar{border-right:none;border-bottom:1px solid rgba(255,255,255,.08)}.calendar-grid{grid-template-columns:repeat(3,minmax(210px,1fr))}}
+@media (max-width:820px){.calendar-grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.periodRow{grid-template-columns:1fr}.periodLabel{padding-top:0;text-align:left;writing-mode:horizontal-tb;transform:none}.main{padding:12px}.surface,.sidebar{padding:16px}.oooItem{grid-template-columns:1fr;grid-template-areas:"name" "from" "to" "delete"}.oooDelete{justify-self:start}.oooName{margin-bottom:2px}}
+</style>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <h1>Hot Seat Planner</h1>
+      <p>Compact weekday planning with 2 AM and 2 PM slots, holidays, exports, and fairness tracking.</p>
+    </div>
+
+    <div class="side-card">
+      <h3>Month creation</h3>
+      <div class="btnRow" style="margin-bottom:10px">
+        <button class="btn small" id="addMonthBtn">Add next month</button>
+      </div>
+      <div class="quickMonths" id="quickMonths"></div>
+      <div class="field" style="margin-top:12px">
+        <label for="otherMonths">Other months</label>
+        <select id="otherMonths" class="monthSelect"></select>
+      </div>
+    </div>
+
+    <div class="side-card">
+      <h3>Time off / OOO</h3>
+      <div class="field" style="margin-bottom:10px">
+        <label for="oooMember">Member</label>
+        <select id="oooMember"></select>
+      </div>
+      <div class="field" style="margin-bottom:10px">
+        <label for="oooFrom">From</label>
+        <input id="oooFrom" type="date">
+      </div>
+      <div class="field" style="margin-bottom:10px">
+        <label for="oooTo">To</label>
+        <input id="oooTo" type="date">
+      </div>
+      <button class="btn small" id="addOooBtn">Add OOO range</button>
+      <div class="divider"></div>
+      <div class="oooHead"><div>Member</div><div>From</div><div>To</div><div></div></div><div id="oooTable" class="oooList"></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="surface">
+      <div class="toolbar">
+        <div>
+          <h2 id="monthTitle">Hot Seat Planner</h2>
+          <div class="muted" id="monthSubtitle"></div><div class="tiny" id="syncStatus" style="margin-top:6px;color:#9f1239;font-weight:800">Connecting…</div>
+        </div>
+        <div class="btnRow">
+          <button class="btn good" id="autoFillBtn">Auto-fill unlocked slots</button>
+          <button class="btn danger" id="clearAllBtn">Clear all slots</button>
+          <button class="btn secondary" id="csvBtn">Export month CSV</button>
+          <button class="btn secondary" id="xlsBtn">Export all to Excel</button>
+          <button class="btn secondary" id="backupBtn">Export JSON</button>
+          <button class="btn secondary" id="importBtn">Import JSON</button>
+          <input type="file" id="importInput" accept=".json,application/json" hidden>
+        </div>
+      </div>
+
+      <div class="stats" id="stats"></div>
+
+      <section class="panelLight" style="margin-bottom:18px">
+        <h3 style="margin-top:0">Monthly schedule</h3>
+        <div class="calendar-grid" id="calendar"></div>
+      </section>
+
+      <section class="panelLight" style="margin-bottom:18px">
+        <h3 style="margin-top:0">Team members</h3>
+        <div class="memberGrid" id="memberTable"></div>
+        <div class="divider"></div>
+        <div style="display:grid;grid-template-columns:1.2fr 1fr .8fr auto;gap:10px;align-items:end">
+          <div class="field"><label>Name</label><input id="newMemberName" placeholder="Name"></div>
+          <div class="field"><label>Role</label><input id="newMemberRole" placeholder="Role"></div>
+          <div class="field"><label>Weight</label><input id="newMemberWeight" type="number" min="0" step="0.1" value="1"></div>
+          <button class="btn" id="addMemberSubmit">Add member</button>
+        </div>
+      </section>
+
+      <section class="panelLight">
+        <h3 style="margin-top:0">Fairness summary</h3>
+        <div class="tableWrap"><table><thead><tr><th>Member</th><th>Role</th><th>Weight</th><th>Assigned</th><th>Expected</th><th>Diff</th></tr></thead><tbody id="fairnessTable"></tbody></table></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script>
+const STORAGE_KEY = 'hotseat_planner_offline_compact_red_v5';
+const SLOT_KEYS = ['AM1','AM2','PM1','PM2'];
+const DEFAULT_DATA = {
+  members:[
+    {id:'jeroen',name:'Jeroen',role:'SafetyCE',weight:1,active:true},
+    {id:'ludovit',name:'Ludovit',role:'TL',weight:0.5,active:true},
+    {id:'remco',name:'Remco',role:'Senior',weight:1.4,active:true},
+    {id:'dominik',name:'Dominik',role:'SafetyCE',weight:1,active:true},
+    {id:'szymon',name:'Szymon',role:'Senior',weight:1.4,active:true},
+    {id:'szabolcs',name:'Szabolcs',role:'Regular',weight:1.1,active:true},
+    {id:'gabor',name:'Gabor',role:'Regular',weight:1,active:true}
+  ],
+  months:{},
+  timeOff:[],
+  currentMonthId:'',
+  meta:{updatedAt:null}
+};
+let clearConfirmArmed = false;
+let clearConfirmTimer = null;
+let state = loadState();
+
+function deepClone(v){return JSON.parse(JSON.stringify(v))}
+function slug(v){return (v||'').toString().trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'') || 'item-'+Math.random().toString(36).slice(2,8)}
+function fmtDate(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return `${y}-${m}-${day}`}
+function parseDate(ds){const [y,m,d]=ds.split('-').map(Number);return new Date(y,m-1,d)}
+function monthId(year,month){return `${year}-${String(month).padStart(2,'0')}`}
+function monthLabel(year,month){return new Intl.DateTimeFormat('en-GB',{month:'long',year:'numeric'}).format(new Date(year,month-1,1))}
+function escapeHtml(str){return String(str??'').replace(/[&<>"']/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]))}
+
+function easterSunday(year){const a=year%19,b=Math.floor(year/100),c=year%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),n=Math.floor((h+l-7*m+114)/31),p=(h+l-7*m+114)%31+1;return new Date(year,n-1,p)}
+function belgianHolidayMap(year){const es=easterSunday(year);const copy=d=>new Date(d.getFullYear(),d.getMonth(),d.getDate());const addDays=(d,n)=>{const x=copy(d);x.setDate(x.getDate()+n);return x};const fixed=[new Date(year,0,1),new Date(year,4,1),new Date(year,6,21),new Date(year,7,15),new Date(year,10,1),new Date(year,10,11),new Date(year,11,25)];const movable=[addDays(es,1),addDays(es,39),addDays(es,50)];const map={};[...fixed,...movable].forEach(d=>map[fmtDate(d)]=true);return map}
+function isHoliday(dateStr){return !!belgianHolidayMap(Number(dateStr.slice(0,4)))[dateStr]}
+function getWorkingDayList(year,month){const out=[];const total=new Date(year,month,0).getDate();for(let d=1;d<=total;d++){const dt=new Date(year,month-1,d);const day=dt.getDay();if(day===0||day===6)continue;out.push(fmtDate(dt))}return out}
+
+function loadState(){
+  try{const raw=localStorage.getItem(STORAGE_KEY);if(raw)return normalizeData(JSON.parse(raw));}catch(e){console.error(e)}
+  const base=deepClone(DEFAULT_DATA);
+  const now=new Date();
+  const cm=monthId(now.getFullYear(),now.getMonth()+1);
+  const nmDate=new Date(now.getFullYear(),now.getMonth()+1,1);
+  const nm=monthId(nmDate.getFullYear(),nmDate.getMonth()+1);
+  ensureMonthObject(base,cm,now.getFullYear(),now.getMonth()+1);
+  ensureMonthObject(base,nm,nmDate.getFullYear(),nmDate.getMonth()+1);
+  base.currentMonthId=cm;
+  return normalizeData(base);
+}
+function saveState(){
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+  queueRemoteSave();
+}
+function applyRemoteState(remote,force=false){
+  if(!remote) return;
+  const remoteUpdatedAt=remote?.meta?.updatedAt||'';
+  const localUpdatedAt=state?.meta?.updatedAt||'';
+  if(!force && remoteUpdatedAt && remoteUpdatedAt===localUpdatedAt && JSON.stringify(remote)===JSON.stringify(state)) return;
+  applyingRemote=true;
+  state=normalizeData(remote);
+  lastRemoteUpdatedAt=state?.meta?.updatedAt||'';
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+  render();
+  applyingRemote=false;
+  setSyncStatus('Live sync on','#166534');
+}
+function setSyncStatus(text,color){
+  const el=document.getElementById('syncStatus');
+  if(!el)return;
+  el.textContent=text;
+  if(color)el.style.color=color;
+}
+function queueRemoteSave(){
+  if(!firebaseReady || applyingRemote) return;
+  clearTimeout(saveTimer);
+  setSyncStatus('Syncing…','#9f1239');
+  saveTimer=setTimeout(pushStateToFirebase,250);
+}
+async function pushStateToFirebase(){
+  if(!firebaseReady || applyingRemote || !dbRef) return;
+  try{
+    await dbRef.set(JSON.parse(JSON.stringify(state)));
+    setSyncStatus('Live sync on','#166534');
+  }catch(err){
+    console.error(err);
+    setSyncStatus('Sync failed - saved locally only','#991b1b');
+  }
+}
+async function initFirebaseSync(){
+  if(!FIREBASE_ENABLED || typeof firebase==='undefined'){
+    setSyncStatus('Offline only','#991b1b');
+    return;
+  }
+  try{
+    firebase.initializeApp(firebaseConfig);
+    await firebase.auth().signInAnonymously();
+    authUser=firebase.auth().currentUser;
+    dbRef=firebase.database().ref(LIVE_DATA_PATH);
+    dbRef.on('value', snap=>{
+      const remote=snap.val();
+      if(remote){
+        applyRemoteState(remote);
+      }else{
+        firebaseReady=true;
+        pushStateToFirebase();
+      }
+    });
+    firebaseReady=true;
+    setSyncStatus('Live sync on','#166534');
+    clearInterval(pollTimer);
+    pollTimer=setInterval(async()=>{
+      if(!firebaseReady || applyingRemote || !dbRef || document.hidden) return;
+      try{
+        const snap=await dbRef.once('value');
+        const remote=snap.val();
+        if(remote && (remote?.meta?.updatedAt||'')!==lastRemoteUpdatedAt){
+          applyRemoteState(remote,true);
+        }
+      }catch(err){
+        console.error(err);
+      }
+    },3000);
+  }catch(err){
+    console.error(err);
+    setSyncStatus('Offline only - Firebase connection failed','#991b1b');
+  }
+}
+function normalizeData(data){
+  data.members=Array.isArray(data.members)?data.members:[];
+  data.timeOff=Array.isArray(data.timeOff)?data.timeOff:[];
+  data.months=data.months||{};
+  data.meta=data.meta||{};
+  data.members.forEach(m=>{m.id=m.id||slug(m.name);m.name=m.name||'Unnamed';m.role=m.role||'';m.weight=Math.max(0,Number(m.weight||1));m.active=!!m.active});
+  Object.entries(data.months).forEach(([id,month])=>normalizeMonth(month,id));
+  if(!data.currentMonthId||!data.months[data.currentMonthId]){const ids=Object.keys(data.months).sort();data.currentMonthId=ids[0]||''}
+  if(!data.currentMonthId){const now=new Date();const id=monthId(now.getFullYear(),now.getMonth()+1);ensureMonthObject(data,id,now.getFullYear(),now.getMonth()+1);data.currentMonthId=id}
+  ensureQuickMonthsExist(data);
+  return data;
+}
+function ensureQuickMonthsExist(root){const now=new Date();const currentId=monthId(now.getFullYear(),now.getMonth()+1);const nextDate=new Date(now.getFullYear(),now.getMonth()+1,1);const nextId=monthId(nextDate.getFullYear(),nextDate.getMonth()+1);ensureMonthObject(root,currentId,now.getFullYear(),now.getMonth()+1);ensureMonthObject(root,nextId,nextDate.getFullYear(),nextDate.getMonth()+1)}
+function ensureMonthObject(root,id,year,month){if(!root.months[id])root.months[id]={year,month,slots:{}};normalizeMonth(root.months[id],id);return root.months[id]}
+function normalizeMonth(month,id){if(!month.year||!month.month){const [y,m]=id.split('-').map(Number);month.year=y;month.month=m}month.slots=month.slots||{};for(const ds of getWorkingDayList(month.year,month.month)){const existing=month.slots[ds]||{};month.slots[ds]={AM1:existing.AM1||'',AM2:existing.AM2||'',PM1:existing.PM1||'',PM2:existing.PM2||'',locked:{AM1:!!existing.locked?.AM1,AM2:!!existing.locked?.AM2,PM1:!!existing.locked?.PM1,PM2:!!existing.locked?.PM2},note:existing.note||''}}}
+function getCurrentMonth(){return state.months[state.currentMonthId]}
+function getSortedMonthIds(){return Object.keys(state.months).sort()}
+function activeMembers(){return state.members.filter(m=>m.active)}
+function memberById(id){return state.members.find(m=>m.id===id)}
+function memberByName(name){return state.members.find(m=>m.name===name)}
+function isOoo(memberId,dateStr){return state.timeOff.some(r=>r.memberId===memberId && r.from<=dateStr && r.to>=dateStr)}
+function touch(renderNow=false){state.meta.updatedAt=new Date().toISOString();if(renderNow)render();saveState()}
+function ensureDay(dateStr){const month=getCurrentMonth();if(!month.slots[dateStr])month.slots[dateStr]={AM1:'',AM2:'',PM1:'',PM2:'',locked:{AM1:false,AM2:false,PM1:false,PM2:false},note:''}}
+
+function render(){renderMonthPicker();renderHeader();renderStats();renderCalendar();renderMembers();renderOooOptions();renderOooTable();renderFairness()}
+function renderMonthPicker(){
+  const quick=document.getElementById('quickMonths');
+  const select=document.getElementById('otherMonths');
+  const now=new Date();
+  const currentId=monthId(now.getFullYear(),now.getMonth()+1);
+  const nextDate=new Date(now.getFullYear(),now.getMonth()+1,1);
+  const nextId=monthId(nextDate.getFullYear(),nextDate.getMonth()+1);
+  ensureQuickMonthsExist(state);
+  const quickIds=[currentId,nextId].filter((id,i,a)=>state.months[id]&&a.indexOf(id)===i);
+  quick.innerHTML=quickIds.map(id=>`<button class="monthBtn ${id===state.currentMonthId?'active':''}" data-id="${id}">${monthLabel(state.months[id].year,state.months[id].month)}</button>`).join('');
+  quick.querySelectorAll('button').forEach(btn=>btn.onclick=()=>{state.currentMonthId=btn.dataset.id;touch();render()});
+  const others=getSortedMonthIds().filter(id=>!quickIds.includes(id));
+  select.innerHTML=`<option value="">Select another month...</option>`+others.map(id=>`<option value="${id}" ${id===state.currentMonthId?'selected':''}>${monthLabel(state.months[id].year,state.months[id].month)}</option>`).join('');
+  select.onchange=()=>{if(select.value){state.currentMonthId=select.value;touch();render()}}
+}
+function renderHeader(){const m=getCurrentMonth();document.getElementById('monthTitle').textContent=monthLabel(m.year,m.month);document.getElementById('monthSubtitle').textContent='Monday to Friday only · 2 AM + 2 PM slots · Belgian holidays greyed out'}
+function calcAssignments(monthIdSel=state.currentMonthId){const month=state.months[monthIdSel];const counts={};state.members.forEach(m=>counts[m.id]=0);for(const day of Object.values(month.slots)){for(const key of SLOT_KEYS){const mem=memberByName(day[key]);if(mem)counts[mem.id]++}}return counts}
+function workingDaysInMonth(month){return getWorkingDayList(month.year,month.month).filter(ds=>!isHoliday(ds)).length}
+function renderStats(){const month=getCurrentMonth();const counts=calcAssignments();const totalSlots=workingDaysInMonth(month)*4;const assigned=Object.values(counts).reduce((a,b)=>a+b,0);const cards=[['Working slots',totalSlots],['Assigned',assigned],['Active members',activeMembers().length],['OOO ranges',state.timeOff.length]];document.getElementById('stats').innerHTML=cards.map(([k,v])=>`<div class="stat"><div class="muted">${k}</div><b>${v}</b></div>`).join('')}
+function dayCardClass(dateStr){const today=fmtDate(new Date());const cl=['day'];if(isHoliday(dateStr))cl.push('holiday');if(today===dateStr)cl.push('today');if(activeMembers().some(mem=>isOoo(mem.id,dateStr)))cl.push('oooDay');return cl.join(' ')}
+function getSiblingSlot(slot){return slot==='AM1'?'AM2':slot==='AM2'?'AM1':slot==='PM1'?'PM2':'PM1'}
+function isDuplicateWithinPeriod(dateStr,slot,name){
+  if(!name)return false;
+  const day=getCurrentMonth().slots[dateStr]||{};
+  const sibling=getSiblingSlot(slot);
+  return (slot.startsWith('AM')&&sibling.startsWith('AM') || slot.startsWith('PM')&&sibling.startsWith('PM')) && day[sibling]===name;
+}
+function renderCalendar(){
+  const month=getCurrentMonth();
+  const cal=document.getElementById('calendar');
+  const dates=getWorkingDayList(month.year,month.month).sort();
+  let html='';
+  for(const ds of dates){
+    const date=parseDate(ds);const day=month.slots[ds]||{AM1:'',AM2:'',PM1:'',PM2:'',locked:{AM1:false,AM2:false,PM1:false,PM2:false},note:''};const holiday=isHoliday(ds);const disabled=holiday?'disabled':'';
+    const makeOptions=(selected,dateStr,slot)=>['<option value="">—</option>'].concat(activeMembers().map(mem=>{
+      const blocked=isDuplicateWithinPeriod(dateStr,slot,mem.name) && selected!==mem.name;
+      return `<option value="${escapeHtml(mem.name)}" ${selected===mem.name?'selected':''} ${blocked?'disabled':''}>${escapeHtml(mem.name)}</option>`;
+    })).join('');
+    html+=`<div class="${dayCardClass(ds)}" data-date="${ds}">
+      <div class="dayHead"><div><h4>${date.toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short'})}</h4><div class="tiny">${holiday?'Belgian holiday':'Working day'}</div></div><span class="pill">${ds}</span></div>
+      <div class="periodGrid">
+        <div class="periodRow">
+          <div class="periodLabel">AM</div>
+          <div class="slot"><div class="slotTop"><label>Slot 1</label><label class="lockLabel"><input type="checkbox" class="lockToggle" data-date="${ds}" data-slot="AM1" ${day.locked.AM1?'checked':''} ${disabled}>lock</label></div><select class="slotSelect" data-date="${ds}" data-slot="AM1" ${disabled}>${makeOptions(day.AM1,ds,"AM1")}</select></div>
+          <div class="slot"><div class="slotTop"><label>Slot 2</label><label class="lockLabel"><input type="checkbox" class="lockToggle" data-date="${ds}" data-slot="AM2" ${day.locked.AM2?'checked':''} ${disabled}>lock</label></div><select class="slotSelect" data-date="${ds}" data-slot="AM2" ${disabled}>${makeOptions(day.AM2,ds,"AM2")}</select></div>
+        </div>
+        <div class="periodRow">
+          <div class="periodLabel">PM</div>
+          <div class="slot"><div class="slotTop"><label>Slot 1</label><label class="lockLabel"><input type="checkbox" class="lockToggle" data-date="${ds}" data-slot="PM1" ${day.locked.PM1?'checked':''} ${disabled}>lock</label></div><select class="slotSelect" data-date="${ds}" data-slot="PM1" ${disabled}>${makeOptions(day.PM1,ds,"PM1")}</select></div>
+          <div class="slot"><div class="slotTop"><label>Slot 2</label><label class="lockLabel"><input type="checkbox" class="lockToggle" data-date="${ds}" data-slot="PM2" ${day.locked.PM2?'checked':''} ${disabled}>lock</label></div><select class="slotSelect" data-date="${ds}" data-slot="PM2" ${disabled}>${makeOptions(day.PM2,ds,"PM2")}</select></div>
+        </div>
+      </div>
+      <textarea class="dayNote" data-date="${ds}" placeholder="Notes">${escapeHtml(day.note||'')}</textarea>
+    </div>`;
+  }
+  cal.innerHTML=html;
+  cal.querySelectorAll('.slotSelect').forEach(el=>el.onchange=e=>{
+    const {date,slot}=e.target.dataset;
+    const value=e.target.value;
+    ensureDay(date);
+    if(isDuplicateWithinPeriod(date,slot,value)){
+      alert('That member is already assigned in the other '+(slot.startsWith('AM')?'AM':'PM')+' slot for this day.');
+      e.target.value='';
+      getCurrentMonth().slots[date][slot]='';
+      getCurrentMonth().slots[date].locked[slot]=false;
+      touch();render();
+      return;
+    }
+    getCurrentMonth().slots[date][slot]=value;
+    getCurrentMonth().slots[date].locked[slot]=!!value;
+    touch();render()
+  });
+  cal.querySelectorAll('.lockToggle').forEach(el=>el.onchange=e=>{const {date,slot}=e.target.dataset;ensureDay(date);getCurrentMonth().slots[date].locked[slot]=e.target.checked;touch(true)});
+  cal.querySelectorAll('.dayNote').forEach(el=>el.onchange=e=>{const date=e.target.dataset.date;ensureDay(date);getCurrentMonth().slots[date].note=e.target.value;touch(true)});
+}
+function renderMembers(){
+  const wrap=document.getElementById('memberTable');
+  wrap.innerHTML=state.members.map(mem=>`<div class="memberCard">
+    <div class="memberCardHead"><div><div class="memberName">${escapeHtml(mem.name)}</div><div class="memberRolePill">${escapeHtml(mem.role||'No role')}</div></div><button class="btn danger small" data-delete="${mem.id}">Remove</button></div>
+    <div class="field"><label>Name</label><input data-field="name" data-id="${mem.id}" value="${escapeHtml(mem.name)}"></div>
+    <div class="field"><label>Role</label><input data-field="role" data-id="${mem.id}" value="${escapeHtml(mem.role)}"></div>
+    <div class="field"><label>Weight</label><input data-field="weight" data-id="${mem.id}" type="number" min="0" step="0.1" value="${Number(mem.weight).toFixed(1)}"></div>
+    <div class="switchRow"><span>Available for planning</span><label><input data-field="active" data-id="${mem.id}" type="checkbox" ${mem.active?'checked':''}></label></div>
+  </div>`).join('');
+  wrap.querySelectorAll('input[data-field]').forEach(input=>input.onchange=e=>{const id=e.target.dataset.id,field=e.target.dataset.field,mem=memberById(id);if(!mem)return;if(field==='active')mem.active=e.target.checked;else if(field==='weight')mem[field]=Math.max(0,Number(e.target.value||0));else mem[field]=e.target.value.trim();touch();render()});
+  wrap.querySelectorAll('button[data-delete]').forEach(btn=>btn.onclick=()=>{const id=btn.dataset.delete;state.members=state.members.filter(m=>m.id!==id);state.timeOff=state.timeOff.filter(r=>r.memberId!==id);for(const month of Object.values(state.months)){for(const day of Object.values(month.slots)){for(const key of SLOT_KEYS){const mem=memberById(id);if(mem&&day[key]===mem.name)day[key]=''}}}touch();render()})
+}
+function renderOooOptions(){document.getElementById('oooMember').innerHTML=activeMembers().map(m=>`<option value="${m.id}">${escapeHtml(m.name)}</option>`).join('')}
+function renderOooTable(){const tbody=document.getElementById('oooTable');tbody.innerHTML=state.timeOff.map((r,i)=>`<div class="oooItem"><div class="oooName">${escapeHtml(memberById(r.memberId)?.name||r.memberId)}</div><div class="oooDelete"><button class="btn danger small" data-i="${i}">Delete</button></div><div class="oooMeta oooFrom"><span class="oooMetaLabel">From</span><span class="oooMetaValue">${r.from}</span></div><div class="oooMeta oooTo"><span class="oooMetaLabel">To</span><span class="oooMetaValue">${r.to}</span></div></div>`).join('')||'<div class="oooEmpty">No time off recorded.</div>';tbody.querySelectorAll('button[data-i]').forEach(btn=>btn.onclick=()=>{state.timeOff.splice(Number(btn.dataset.i),1);touch();render()})}
+function renderFairness(){const month=getCurrentMonth();const counts=calcAssignments();const body=document.getElementById('fairnessTable');const active=activeMembers();const workingDates=getWorkingDayList(month.year,month.month).filter(ds=>!isHoliday(ds));const availability={};for(const mem of active){availability[mem.id]=workingDates.reduce((acc,ds)=>acc+(isOoo(mem.id,ds)?0:1),0)}const totalAvailWeight=active.reduce((sum,m)=>sum+m.weight*availability[m.id],0)||1;const totalSlots=workingDates.length*4;body.innerHTML=active.map(mem=>{const expected=(mem.weight*availability[mem.id]/totalAvailWeight)*totalSlots;const diff=(counts[mem.id]||0)-expected;return `<tr><td>${escapeHtml(mem.name)}</td><td>${escapeHtml(mem.role)}</td><td>${mem.weight.toFixed(1)}</td><td>${counts[mem.id]||0}</td><td>${expected.toFixed(1)}</td><td class="${diff>0.5?'dangerText':''}">${diff>0?'+':''}${diff.toFixed(1)}</td></tr>`}).join('')}
+
+function pickBestMember(dateStr,currentCounts,month){const already=new Set(SLOT_KEYS.map(k=>month.slots[dateStr][k]).filter(Boolean));const workingDates=getWorkingDayList(month.year,month.month).filter(ds=>!isHoliday(ds));const totalSlots=workingDates.length*4;const everyone=activeMembers();const candidates=everyone.filter(mem=>!already.has(mem.name)&&!isOoo(mem.id,dateStr));if(!candidates.length)return '';const availability={};everyone.forEach(mem=>availability[mem.id]=workingDates.reduce((acc,ds)=>acc+(isOoo(mem.id,ds)?0:1),0));const totalAvailWeight=everyone.reduce((sum,m)=>sum+m.weight*availability[m.id],0)||1;let best=null;for(const mem of candidates){const expected=(mem.weight*availability[mem.id]/totalAvailWeight)*totalSlots;const assigned=currentCounts[mem.id]||0;const ratio=assigned/Math.max(expected,0.25);const score=ratio+(Math.random()*0.02);if(!best||score<best.score)best={mem,score}}return best?.mem.name||''}
+function autoFillMonth(){const month=getCurrentMonth();const counts=calcAssignments();for(const ds of Object.keys(month.slots).sort()){if(isHoliday(ds))continue;for(const key of SLOT_KEYS){const day=month.slots[ds];if(day.locked[key])continue;const picked=pickBestMember(ds,counts,month);day[key]=picked;if(picked){day.locked[key]=true;const mem=memberByName(picked);if(mem)counts[mem.id]=(counts[mem.id]||0)+1}}}touch();render()}
+function armClearAll(){const btn=document.getElementById('clearAllBtn');if(!clearConfirmArmed){clearConfirmArmed=true;btn.textContent='Click again to confirm';btn.classList.add('confirming');clearConfirmTimer=setTimeout(resetClearButton,4000);return}clearAllSlots()}
+function resetClearButton(){clearConfirmArmed=false;clearTimeout(clearConfirmTimer);const btn=document.getElementById('clearAllBtn');btn.textContent='Clear all slots';btn.classList.remove('confirming')}
+function clearAllSlots(){const month=getCurrentMonth();for(const day of Object.values(month.slots)){for(const key of SLOT_KEYS){day[key]='';day.locked[key]=false}}touch();resetClearButton();render()}
+function downloadFile(name,content,mime){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type:mime}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
+function exportMonthCsv(){const month=getCurrentMonth();const rows=[['Date','Weekday','AM1','AM2','PM1','PM2','Note']];for(const ds of getWorkingDayList(month.year,month.month)){const date=parseDate(ds),day=month.slots[ds]||{};rows.push([ds,date.toLocaleDateString('en-GB',{weekday:'long'}),day.AM1||'',day.AM2||'',day.PM1||'',day.PM2||'',day.note||''])}const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');downloadFile(`hotseat_${state.currentMonthId}.csv`,csv,'text/csv;charset=utf-8')}
+function exportAllExcel(){let html='<html><head><meta charset="utf-8"></head><body>';for(const id of getSortedMonthIds()){const month=state.months[id];html+=`<table border="1"><tr><th colspan="7">${monthLabel(month.year,month.month)}</th></tr><tr><th>Date</th><th>Weekday</th><th>AM1</th><th>AM2</th><th>PM1</th><th>PM2</th><th>Note</th></tr>`;for(const ds of getWorkingDayList(month.year,month.month)){const date=parseDate(ds),day=month.slots[ds]||{};html+=`<tr><td>${ds}</td><td>${date.toLocaleDateString('en-GB',{weekday:'long'})}</td><td>${escapeHtml(day.AM1||'')}</td><td>${escapeHtml(day.AM2||'')}</td><td>${escapeHtml(day.PM1||'')}</td><td>${escapeHtml(day.PM2||'')}</td><td>${escapeHtml(day.note||'')}</td></tr>`}html+='</table><br/>'}html+='</body></html>';downloadFile('hotseat_all_months.xls',html,'application/vnd.ms-excel')}
+function exportJson(){downloadFile('hotseat_backup.json',JSON.stringify(state,null,2),'application/json;charset=utf-8')}
+async function importJson(file){const text=await file.text();state=normalizeData(JSON.parse(text));touch();render()}
+function addMonth(year,month){const id=monthId(year,month);ensureMonthObject(state,id,year,month);state.currentMonthId=id;touch();render()}
+function addNextMonth(){const ids=getSortedMonthIds();const last=state.months[ids[ids.length-1]]||getCurrentMonth();let y=last.year,m=last.month+1;if(m===13){m=1;y++}addMonth(y,m)}
+function addMember(){const name=document.getElementById('newMemberName').value.trim();if(!name)return;const role=document.getElementById('newMemberRole').value.trim();const weight=Math.max(0,Number(document.getElementById('newMemberWeight').value||1));state.members.push({id:slug(name+'-'+Date.now()),name,role,weight,active:true});document.getElementById('newMemberName').value='';document.getElementById('newMemberRole').value='';document.getElementById('newMemberWeight').value='1';touch();render()}
+function addOoo(){const memberId=document.getElementById('oooMember').value,from=document.getElementById('oooFrom').value,to=document.getElementById('oooTo').value;if(!memberId||!from||!to)return;state.timeOff.push({memberId,from,to:to<from?from:to});state.timeOff.sort((a,b)=>a.from.localeCompare(b.from));touch();render()}
+
+function bindUi(){document.getElementById('autoFillBtn').onclick=autoFillMonth;document.getElementById('clearAllBtn').onclick=armClearAll;document.getElementById('csvBtn').onclick=exportMonthCsv;document.getElementById('xlsBtn').onclick=exportAllExcel;document.getElementById('backupBtn').onclick=exportJson;document.getElementById('importBtn').onclick=()=>document.getElementById('importInput').click();document.getElementById('importInput').onchange=e=>{if(e.target.files[0])importJson(e.target.files[0]);e.target.value=''};document.getElementById('addMemberSubmit').onclick=addMember;document.getElementById('addOooBtn').onclick=addOoo;document.getElementById('addMonthBtn').onclick=addNextMonth}
+
+bindUi();
+render();
+initFirebaseSync();
+</script>
+</body>
+</html>
