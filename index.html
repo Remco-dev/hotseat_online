@@ -162,6 +162,19 @@ function saveState(){
   localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
   queueRemoteSave();
 }
+function applyRemoteState(remote,force=false){
+  if(!remote) return;
+  const remoteUpdatedAt=remote?.meta?.updatedAt||'';
+  const localUpdatedAt=state?.meta?.updatedAt||'';
+  if(!force && remoteUpdatedAt && remoteUpdatedAt===localUpdatedAt && JSON.stringify(remote)===JSON.stringify(state)) return;
+  applyingRemote=true;
+  state=normalizeData(remote);
+  lastRemoteUpdatedAt=state?.meta?.updatedAt||'';
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+  render();
+  applyingRemote=false;
+  setSyncStatus('Live sync on','#166534');
+}
 function setSyncStatus(text,color){
   const el=document.getElementById('syncStatus');
   if(!el)return;
@@ -197,12 +210,7 @@ async function initFirebaseSync(){
     dbRef.on('value', snap=>{
       const remote=snap.val();
       if(remote){
-        applyingRemote=true;
-        state=normalizeData(remote);
-        localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
-        render();
-        applyingRemote=false;
-        setSyncStatus('Live sync on','#166534');
+        applyRemoteState(remote);
       }else{
         firebaseReady=true;
         pushStateToFirebase();
@@ -210,6 +218,19 @@ async function initFirebaseSync(){
     });
     firebaseReady=true;
     setSyncStatus('Live sync on','#166534');
+    clearInterval(pollTimer);
+    pollTimer=setInterval(async()=>{
+      if(!firebaseReady || applyingRemote || !dbRef || document.hidden) return;
+      try{
+        const snap=await dbRef.once('value');
+        const remote=snap.val();
+        if(remote && (remote?.meta?.updatedAt||'')!==lastRemoteUpdatedAt){
+          applyRemoteState(remote,true);
+        }
+      }catch(err){
+        console.error(err);
+      }
+    },3000);
   }catch(err){
     console.error(err);
     setSyncStatus('Offline only - Firebase connection failed','#991b1b');
@@ -236,7 +257,7 @@ function activeMembers(){return state.members.filter(m=>m.active)}
 function memberById(id){return state.members.find(m=>m.id===id)}
 function memberByName(name){return state.members.find(m=>m.name===name)}
 function isOoo(memberId,dateStr){return state.timeOff.some(r=>r.memberId===memberId && r.from<=dateStr && r.to>=dateStr)}
-function touch(){state.meta.updatedAt=new Date().toISOString();saveState()}
+function touch(renderNow=false){state.meta.updatedAt=new Date().toISOString();if(renderNow)render();saveState()}
 function ensureDay(dateStr){const month=getCurrentMonth();if(!month.slots[dateStr])month.slots[dateStr]={AM1:'',AM2:'',PM1:'',PM2:'',locked:{AM1:false,AM2:false,PM1:false,PM2:false},note:''}}
 
 function render(){renderMonthPicker();renderHeader();renderStats();renderCalendar();renderMembers();renderOooOptions();renderOooTable();renderFairness()}
@@ -312,8 +333,8 @@ function renderCalendar(){
     getCurrentMonth().slots[date].locked[slot]=!!value;
     touch();render()
   });
-  cal.querySelectorAll('.lockToggle').forEach(el=>el.onchange=e=>{const {date,slot}=e.target.dataset;ensureDay(date);getCurrentMonth().slots[date].locked[slot]=e.target.checked;touch()});
-  cal.querySelectorAll('.dayNote').forEach(el=>el.onchange=e=>{const date=e.target.dataset.date;ensureDay(date);getCurrentMonth().slots[date].note=e.target.value;touch()});
+  cal.querySelectorAll('.lockToggle').forEach(el=>el.onchange=e=>{const {date,slot}=e.target.dataset;ensureDay(date);getCurrentMonth().slots[date].locked[slot]=e.target.checked;touch(true)});
+  cal.querySelectorAll('.dayNote').forEach(el=>el.onchange=e=>{const date=e.target.dataset.date;ensureDay(date);getCurrentMonth().slots[date].note=e.target.value;touch(true)});
 }
 function renderMembers(){
   const wrap=document.getElementById('memberTable');
